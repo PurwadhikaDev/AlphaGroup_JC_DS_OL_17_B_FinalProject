@@ -53,7 +53,6 @@
   - FP = 21
   - FN = 15
   - TN = 891
-- Model efektif mengurangi churn dan siap dipakai di sistem produksi.
 
 ## ⚠️ Batasan
 
