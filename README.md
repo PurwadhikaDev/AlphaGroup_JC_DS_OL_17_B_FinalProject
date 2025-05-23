@@ -19,10 +19,7 @@
   - Numerik: Iterative Imputer + XGBoost.
   - Kategorikal: modus.
 - Transformasi numerik: OptBinning + WoE/IV.
-- Klasifikasi fitur:
-  - Aman
-  - Berisiko (WoE ekstrem)
-  - Tidak aman (IV tinggi → potensi leakage)
+
 ---
 # PART 2: EDA
 ## 📊 Exploratory Data Analysis (EDA)
