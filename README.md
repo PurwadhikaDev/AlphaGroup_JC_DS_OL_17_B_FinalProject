@@ -1,160 +1,95 @@
 # 📦 E-Commerce Customer Churn Prediction
 
-## 1. Business Understanding
+# PART 1 : PREPROCESSING
+## 🎯 Business Understanding
 
-### 1.1 Context
-Industri e-commerce sangat kompetitif, dan pelanggan dapat dengan mudah berpindah platform jika tidak puas. Maka, penting untuk memahami dan mengantisipasi churn (berhentinya pelanggan menggunakan layanan).  
-**Target:**
-- 0: Tidak churn
-- 1: Churn  
-Churn rate saat ini: **16.84%**
+- Industri e-commerce sangat kompetitif, churn pelanggan menjadi ancaman nyata.
+- Churn rate saat ini: 16.84% → jauh di atas rata-rata ideal industri (5–10%).
+- Retensi lebih murah dan menguntungkan daripada akuisisi pelanggan baru.
+- Target klasifikasi: 0 = tidak churn, 1 = churn.
+- Tujuan: membangun model prediksi churn untuk mendukung strategi retensi.
+- Pendekatan: eksplorasi data → model klasifikasi → intervensi proaktif.
+- Metrik utama: **F2-Score** untuk meminimalkan **False Negatives** (FN).
+- Stakeholders utama: pelanggan, vendor, investor, pesaing, payment gateway.
 
-### 1.1.1 Market Overview
-E-commerce berkembang pesat, terutama pasca-COVID-19, dengan CAGR global mencapai **6.23%** (2025–2030). Pertumbuhan signifikan terjadi di Asia-Pasifik, didorong oleh meningkatnya kelas menengah dan penetrasi digital.
+## 🧹 Data Preparation
 
-### 1.1.2 Potential Stakeholders
-- Pelanggan
-- Pegawai retail
-- Vendor
-- Shareholders & investors
-- Pesaing
-- Payment gateway
-
-### 1.2 Problem Statement
-Tingkat churn saat ini melebihi ambang ideal industri (5–10%). Kehilangan pelanggan lebih mahal dibanding mempertahankannya. Meningkatkan retensi 5% dapat menaikkan profit hingga 95%.
-
-### 1.3 Goals
-Mengembangkan model prediksi churn untuk mengidentifikasi pelanggan berisiko dan mendukung strategi retensi.
-
-### 1.4 Analytics Approach
-- Eksplorasi data & identifikasi pola
-- Bangun model klasifikasi
-- Prediksi risiko churn
-- Lakukan intervensi proaktif
-
-### 1.5 Metric Evaluation
-- Fokus utama: **minimalkan False Negative (FN)**
-- **F2-Score** digunakan karena menekankan recall sambil tetap memperhatikan precision.
-
-### 1.6 Limitation and Benefits
-✅ **Manfaat**:
-- Target biner mudah diinterpretasi
-- Kombinasi fitur numerik & kategorikal
-
-⚠️ **Batasan**:
-- Tidak ada timestamp
-- Beberapa satuan nilai tidak jelas
-- Potensi bias dari proporsi unik
-
----
-
-## 2. Data Preparation
-
-- Hapus duplikat & outlier
-- Imputasi:
-  - Numerik: Iterative Imputer + XGBoost
-  - Kategorikal: modus
-- Binning fitur numerik: OptBinning
-- Perhitungan WoE & IV
+- Hapus duplikasi dan outlier.
+- Imputasi nilai hilang:
+  - Numerik: Iterative Imputer + XGBoost.
+  - Kategorikal: modus.
+- Transformasi numerik: OptBinning + WoE/IV.
 - Klasifikasi fitur:
   - Aman
-  - Berisiko
-  - Tidak Aman (berpotensi leakage)
+  - Berisiko (WoE ekstrem)
+  - Tidak aman (IV tinggi → potensi leakage)
+---
+# PART 2: EDA
+## 📊 Exploratory Data Analysis (EDA)
+
+- Distribusi fitur numerik dan kategorikal dianalisis.
+- Fitur dengan hubungan kuat ke churn: `Complain`, `OrderCount`, `SatisfactionScore`, `WarehouseToHome`.
+- Ketimpangan kelas: churn hanya 16.84% → perlu balancing.
+- Ditemukan anomali pada `SatisfactionScore` (skala terbalik).
+- Pola churn muncul pada pelanggan pasif, lokasi jauh, dan metode pembayaran eksternal.
 
 ---
+# PART 3: MACHINE LEARNING
+## 🤖 Machine Learning
 
-## 3. Exploratory Data Analysis (EDA)
+- Tiga skenario model:
+  - Semua fitur (baseline)
+  - Drop fitur tidak aman
+  - Drop fitur tidak aman + berisiko
+- Model yang digunakan: XGBoost, LightGBM, Random Forest, AdaBoost, Gradient Boosting.
+- Pipeline mencakup preprocessing, binning, encoding, SMOTE/ENN, dan evaluasi.
+- Hyperparameter tuning dengan RandomizedSearchCV + Stratified K-Fold.
+- Evaluasi dengan F2-score, confusion matrix, ROC, PR curve, dan uji Wilcoxon.
+- Interpretasi model dilakukan dengan SHAP untuk menjelaskan fitur penting.
 
-- Univariate: distribusi tiap fitur
-- Feature vs Churn: hubungan keluhan, pesanan, dan durasi penggunaan
-- Anomali: SatisfactionScore pakai skala Likert terbalik
-- Imbalance: churn hanya 16.84% → perlu balancing
-- Pola bisnis:
-  - Jarak jauh → churn
-  - Pelanggan pasif & pengeluh → churn
+## ✅ Kesimpulan
 
----
+- Model terbaik: **XGBoost**, threshold optimal = 0.404.
+- F2-score = 0.911 | Recall = 92% | Akurasi = 97%
+- Distribusi prediksi:
+  - TP = 166
+  - FP = 21
+  - FN = 15
+  - TN = 891
+- Model efektif mengurangi churn dan siap dipakai di sistem produksi.
 
-## 4. Machine Learning
+## ⚠️ Batasan
 
-### 4.1 Skenario Pemodelan
-- **S1**: Semua fitur
-- **S2**: Drop fitur tidak aman
-- **S3**: Drop fitur tidak aman & berisiko
+- Beberapa fitur tidak memiliki rentang wajar, perlu pembatasan:
+  - WarehouseToHome: 5–36 km
+  - OrderCount: 1–16 pesanan
+  - DaySinceLastOrder: 0–18 hari
+- Identifikasi leakage hanya berbasis WoE/IV (belum pakai timestamp).
+- Fitur berpotensi leakage:
+  - `Tenure`
+  - `CashbackAmount`
+  - `CouponUsed`
+  - `OrderCount`
+  - `OrderAmountHikeFromlastYear`
+  - `DaySinceLastOrder`
 
-### 4.2 Pipeline & Model
-- Preprocessing: imputasi, binning, encoding
-- Balancing: SMOTE, ENN
-- Model: XGBoost, LightGBM, RF, AdaBoost, Gradient Boosting
+## 💰 Efisiensi Biaya Promosi
 
-### 4.3 Evaluasi
-- Cross-validation + RandomizedSearchCV
-- Metrik utama: **F2-Score**
-- Evaluasi: confusion matrix, ROC, PR-curve, Wilcoxon test
-- Interpretasi model: **SHAP analysis**
+- Skenario tanpa model: semua pelanggan → biaya Rp109,3 juta.
+- Skenario pakai model: hanya 187 pelanggan target → biaya Rp18,7 juta.
+- Efisiensi biaya promosi: **Rp90,6 juta (82.89%)**
 
----
+## 💡 Insight Bisnis
 
-## 5. Kesimpulan
+- Perkuat personalisasi (UI/UX, rekomendasi, bundle).
+- Perbaiki logistik: pengiriman cepat & transparan.
+- Diversifikasi metode pembayaran → hindari churn karena opsi terbatas.
+- Targetkan segmen elektronik & fashion dengan pendekatan yang relevan.
+- Gunakan chatbot, survey, dan CS responsif untuk kurangi churn akibat komplain.
 
-### 5.1 Performa Model
-- Model terbaik: **XGBoost** dengan threshold **0.404**
-- **F2-score**: 0.911 | **Recall churn**: 92% | **Akurasi**: 97%
-- Distribusi:
-  - TP = 166 | FP = 21 | FN = 15 | TN = 891
+## 🛡️ Saran
 
-### 5.2 Batasan Model
-
-#### 5.2.1 Rentang Nilai Ideal Fitur
-| Fitur                        | Rentang Ideal     |
-|-----------------------------|-------------------|
-| WarehouseToHome             | 5 – 36 km         |
-| HourSpendOnApp              | 0 – 4 jam         |
-| NumberOfDeviceRegistered    | 1 – 6 perangkat   |
-| NumberOfAddress             | 1 – 20 alamat     |
-| OrderAmountHikeFromlastYear | 11 – 26           |
-| OrderCount                  | 1 – 16 pesanan    |
-| DaySinceLastOrder           | 0 – 18 hari       |
-
-#### 5.2.2 Identifikasi Fitur Berisiko Leakage
-- **Tidak Aman**: `Tenure` (IV 1.759, WoE ekstrem)
-- **Beresiko**: `CashbackAmount`, `CouponUsed` (WoE > 1.5)
-- **Aman**: `WarehouseToHome`, `OrderCount`, dsb.
-
-### 5.3 Efisiensi Promosi
-
-**Skenario:**
-- Tanpa model → Rp109.300.000 (semua diberi promosi)
-- Dengan model → Rp18.700.000 (hanya 187 pelanggan)
-
-**Efisiensi**: Rp90.600.000 (→ 82.89%)
-
-### 5.4 Insight dari EDA
-
-- **Personalisasi** UI/UX & rekomendasi produk
-- **Optimasi logistik** untuk pelanggan jauh
-- **Diversifikasi pembayaran** (hindari ketergantungan UPI)
-- **Target segmen** elektronik & fashion → strategi spesifik
-- **Survey feedback** & CS responsif untuk pelanggan komplain
-
----
-
-## 6. Saran
-
-Beberapa fitur menunjukkan indikasi **leakage** karena dapat merepresentasikan informasi *pasca-churn*:
-
-| Fitur                  | Potensi Leakage |
-|------------------------|-----------------|
-| Tenure                | Durasi sampai churn |
-| CashbackAmount        | Retensi akhir? |
-| CouponUsed            | Intervensi pasca-churn? |
-| OrderAmountHike       | Cerminkan pola akhir? |
-| OrderCount            | Jika tidak dibatasi waktu |
-| DaySinceLastOrder     | Terkesan "tidak aktif" setelah churn |
-
-### 🛡️ Rekomendasi:
-- Pastikan semua fitur **dicatat sebelum** churn.
-- Sertakan **timestamp atau snapshot waktu**.
-- Hindari fitur dengan data "masa depan" untuk menjaga keabsahan prediksi.
-
----
+- Hindari fitur yang mengandung informasi "masa depan".
+- Sertakan timestamp atau snapshot data historis untuk validasi waktu fitur.
+- Lakukan verifikasi data sebelum digunakan dalam model produksi.
+- Prioritaskan fitur yang relevan dan aman untuk prediksi prospektif.
