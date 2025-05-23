@@ -41,7 +41,7 @@
 - Model yang digunakan: XGBoost, LightGBM, Random Forest, AdaBoost, Gradient Boosting.
 - Pipeline mencakup preprocessing, binning, encoding, SMOTE/ENN, dan evaluasi.
 - Hyperparameter tuning dengan RandomizedSearchCV + Stratified K-Fold.
-- Evaluasi dengan F2-score, confusion matrix, ROC, PR curve, dan uji Wilcoxon.
+- Evaluasi dengan F2-score dan confusion matrix.
 - Interpretasi model dilakukan dengan SHAP untuk menjelaskan fitur penting.
 
 ## ✅ Kesimpulan
@@ -66,9 +66,6 @@
   - `Tenure`
   - `CashbackAmount`
   - `CouponUsed`
-  - `OrderCount`
-  - `OrderAmountHikeFromlastYear`
-  - `DaySinceLastOrder`
 
 ## 💰 Efisiensi Biaya Promosi
 
